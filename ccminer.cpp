@@ -84,6 +84,7 @@ struct workio_cmd {
 };
 
 enum sha_algos {
+	ALGO_THEBESTCOIN,
 	ALGO_BASTION,
 	ALGO_BITC,
 	ALGO_BITCOIN,
@@ -127,6 +128,7 @@ enum sha_algos {
 };
 
 static const char *algo_names[] = {
+	"thebestcoin",
 	"bastion",
 	"credit",
 	"bitcoin",
@@ -272,6 +274,7 @@ static char const usage[] = "\
 Usage: " PROGRAM_NAME " [OPTIONS]\n\
 Options:\n\
   -a, --algo=ALGO       specify the hash algorithm to use\n\
+			thebestcoin TheBestCoin (default)\n\
 			bastion		bastioncoin\n\
 			bitcoin     Bitcoin\n\
 			blake       Blake 256 (SFR/NEOS)\n\
@@ -1219,6 +1222,7 @@ static void stratum_gen_work(struct stratum_ctx *sctx, struct work *work)
 		case ALGO_NEO:
 			diff_to_target(work->target, sctx->job.diff / (65536.0 * opt_difficulty));
 			break;
+		case ALGO_THEBESTCOIN:
 		case ALGO_DMD_GR:
 		case ALGO_MYR_GR:
 		case ALGO_FRESH:
@@ -1463,6 +1467,7 @@ static void *miner_thread(void *userdata)
 			case ALGO_WHC:
 				minmax = 0x70000000U;
 				break;
+			case ALGO_THEBESTCOIN:
 			case ALGO_SKEIN:
 			case ALGO_BITCOIN:
 			case ALGO_WHCX:
@@ -1532,6 +1537,11 @@ static void *miner_thread(void *userdata)
 
 		/* scan nonces for a proof-of-work hash */
 		switch (opt_algo) {
+
+		case ALGO_THEBESTCOIN:
+			rc = scanhash_thebestcoin(thr_id, work.data, work.target,
+				max_nonce, &hashes_done);
+			break;
 
 		case ALGO_HEAVY:
 			rc = scanhash_heavy(thr_id, work.data, work.target,
