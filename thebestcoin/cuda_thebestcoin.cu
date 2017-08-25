@@ -7,8 +7,8 @@
 #define TPB50 64
 
  
-#define Nrow 4
-#define Ncol 4
+#define Nrow 8
+#define Ncol 8
 #define N_ROWS Nrow
 #define N_COLS Ncol
 #define u64type uint2
@@ -584,8 +584,8 @@ void thebestcoin_gpu_hash_32(uint32_t threads, uint32_t startNounce, uint2 *outp
         }
 
         //Prepends the password
-        ((uint2 *)ptrByte)[0] = __ldg(&outputHash[thread]);
-		((uint2 *)ptrByte)[1] = __ldg(&outputHash[thread + threads]);
+		((uint2 *)ptrByte)[0] = __ldg(&outputHash[thread + 0 * threads]);
+		((uint2 *)ptrByte)[1] = __ldg(&outputHash[thread + 1 * threads]);
 		((uint2 *)ptrByte)[2] = __ldg(&outputHash[thread + 2 * threads]);
 		((uint2 *)ptrByte)[3] = __ldg(&outputHash[thread + 3 * threads]);
         ptrByte += pwdlen;

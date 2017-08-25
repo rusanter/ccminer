@@ -87,8 +87,8 @@ extern "C" int scanhash_thebestcoin(int thr_id, uint32_t *pdata,
 	unsigned long *hashes_done)
 {
 	const uint32_t first_nonce = pdata[19];
-	uint32_t intensity = 256 * 256 * 8;
-	//uint32_t intensity = 256 * 8;
+	//uint32_t intensity = 256 * 256 * 8;
+	uint32_t intensity = 256 * 256 * 2;
 	uint32_t tpb = 8;
 //	bool mergeblakekeccak = false;
 	cudaDeviceProp props;

@@ -25,11 +25,11 @@
 typedef unsigned char byte ;
 
 #ifndef N_COLS
-        #define N_COLS 4                                        //Number of columns in the memory matrix
+        #define N_COLS 8                                        //Number of columns in the memory matrix
 #endif
 
 #ifndef N_ROWS
-		#define N_ROWS 4                                        //Number of rows in the memory matrix
+		#define N_ROWS 8                                        //Number of rows in the memory matrix
 #endif
 
 #ifndef nPARALLEL

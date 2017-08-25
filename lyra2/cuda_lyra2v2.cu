@@ -332,8 +332,8 @@ void lyra2v2_cpu_init(int thr_id, uint32_t threads,uint64_t *hash)
 __host__ 
 void lyra2v2_cpu_hash_32(int thr_id, uint32_t threads, uint32_t startNounce, uint64_t *d_outputHash, uint32_t tpb)
 {
-	dim3 grid((threads + tpb - 1) / tpb);
-	dim3 block(tpb);
+	dim3 grid((threads + tpb - 1) / tpb); // = (524288 + 8 - 1) / 8 = 65537
+	dim3 block(tpb); // = 8
 
 	lyra2v2_gpu_hash_32 << <grid, block >> > (threads, startNounce, (uint2*)d_outputHash);
 }

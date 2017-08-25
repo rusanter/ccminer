@@ -84,7 +84,7 @@ extern "C" int scanhash_lyra2v2(int thr_id, uint32_t *pdata,
 	unsigned long *hashes_done)
 {
 	const uint32_t first_nonce = pdata[19];
-	uint32_t intensity = 256 * 256 * 8;
+	uint32_t intensity = 256 * 256 * 8; // = 524288, mem = 768 MB
 	uint32_t tpb = 8;
 //	bool mergeblakekeccak = false;
 	cudaDeviceProp props;
@@ -143,7 +143,7 @@ extern "C" int scanhash_lyra2v2(int thr_id, uint32_t *pdata,
 		skein256_cpu_init(thr_id, throughput);
 		bmw256_cpu_init(thr_id, throughput);
 
-		CUDA_SAFE_CALL(cudaMalloc(&d_hash2[thr_id], 16 * 4 * 3 * sizeof(uint64_t) * throughput));
+		CUDA_SAFE_CALL(cudaMalloc(&d_hash2[thr_id], 16 * 4 * 3 * sizeof(uint64_t) * throughput));// 1536 * throughput
 		lyra2v2_cpu_init(thr_id, throughput, d_hash2[thr_id]);
 		CUDA_SAFE_CALL(cudaMalloc(&d_hash[thr_id], 8 * sizeof(uint32_t) * throughput));
 		init[thr_id] = true;
