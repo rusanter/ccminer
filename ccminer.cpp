@@ -101,8 +101,8 @@ enum sha_algos {
 	ALGO_KECCAK,
 	ALGO_JACKPOT,
 	ALGO_LUFFA_DOOM,
-	ALGO_LYRA2,
-	ALGO_LYRA2v2,
+//	ALGO_LYRA2,
+//	ALGO_LYRA2v2,
 	ALGO_MJOLLNIR,		/* Hefty hash */
 	ALGO_MYR_GR,
 	ALGO_NIST5,
@@ -145,8 +145,8 @@ static const char *algo_names[] = {
 	"keccak",
 	"jackpot",
 	"luffa",
-	"lyra2",
-	"lyra2v2",
+//	"lyra2",
+//	"lyra2v2",
 	"mjollnir",
 	"myr-gr",
 	"nist5",
@@ -1229,12 +1229,12 @@ static void stratum_gen_work(struct stratum_ctx *sctx, struct work *work)
 		case ALGO_FUGUE256:
 		case ALGO_GROESTL:
 		case ALGO_KECCAK:
-		case ALGO_LYRA2v2:
+//		case ALGO_LYRA2v2:
 			diff_to_target(work->target, sctx->job.diff / (256.0 * opt_difficulty));
 			break;
-		case ALGO_LYRA2:
-			diff_to_target(work->target, sctx->job.diff / (128.0 * opt_difficulty));
-			break;
+//		case ALGO_LYRA2:
+//			diff_to_target(work->target, sctx->job.diff / (128.0 * opt_difficulty));
+//			break;
 		default:
 			diff_to_target(work->target, sctx->job.diff / opt_difficulty);
 	}
@@ -1474,7 +1474,7 @@ static void *miner_thread(void *userdata)
 			case ALGO_QUBIT:
 			case ALGO_QUARK:
 			case ALGO_X14:
-			case ALGO_LYRA2v2:
+//			case ALGO_LYRA2v2:
 				minmax = 0x40000000U;
 				break;
 			case ALGO_DOOM:
@@ -1494,7 +1494,7 @@ static void *miner_thread(void *userdata)
 				break;
 			case ALGO_X13:
 			case ALGO_X15:
-			case ALGO_LYRA2:
+//			case ALGO_LYRA2:
 				minmax = 0x300000;
 				break;
 			case ALGO_SCRYPT:
@@ -1644,14 +1644,14 @@ static void *miner_thread(void *userdata)
 			                      max_nonce, &hashes_done);
 			break;
 
-		case ALGO_LYRA2:
-			rc = scanhash_lyra2(thr_id, work.data, work.target,
-			                      max_nonce, &hashes_done);
-			break;
-		case ALGO_LYRA2v2:
-			rc = scanhash_lyra2v2(thr_id, work.data, work.target,
-				max_nonce, &hashes_done);
-			break;
+//		case ALGO_LYRA2:
+//			rc = scanhash_lyra2(thr_id, work.data, work.target,
+//			                      max_nonce, &hashes_done);
+//			break;
+//		case ALGO_LYRA2v2:
+//			rc = scanhash_lyra2v2(thr_id, work.data, work.target,
+//				max_nonce, &hashes_done);
+//			break;
 
 		case ALGO_NIST5:
 			rc = scanhash_nist5(thr_id, work.data, work.target,

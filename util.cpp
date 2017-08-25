@@ -1601,13 +1601,13 @@ void print_hash_tests(void)
 	doomhash(&hash[0], &buf[0]);
 	printpfx("luffa", hash);
 
-	memset(hash, 0, sizeof hash);
-	lyra2_hash(&hash[0], &buf[0]);
-	printpfx("lyra2", hash);
+//	memset(hash, 0, sizeof hash);
+//	lyra2_hash(&hash[0], &buf[0]);
+//	printpfx("lyra2", hash);
 
-	memset(hash, 0, sizeof hash);
-	lyra2v2_hash(&hash[0], &buf[0]);
-	printpfx("lyra2v2", hash);
+//	memset(hash, 0, sizeof hash);
+//	lyra2v2_hash(&hash[0], &buf[0]);
+//	printpfx("lyra2v2", hash);
 
 	memset(hash, 0, sizeof hash);
 	myriadhash(&hash[0], &buf[0]);

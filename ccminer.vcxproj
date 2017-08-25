@@ -107,6 +107,7 @@
       <PtxAsOptionV>true</PtxAsOptionV>
       <Keep>false</Keep>
       <CodeGeneration>compute_50,sm_50</CodeGeneration>
+      <GPUDebugInfo>false</GPUDebugInfo>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -259,6 +260,8 @@
     <ClCompile Include="sph\sph_sha2.c" />
     <ClCompile Include="scrypt-jane.cpp" />
     <ClCompile Include="scrypt.cpp" />
+    <ClCompile Include="thebestcoin\Lyra2v2.c" />
+    <ClCompile Include="thebestcoin\Spongev2.c" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="fuguecoin.cpp" />
     <ClCompile Include="groestlcoin.cpp" />
@@ -270,8 +273,6 @@
     <ClCompile Include="crc32.c" />
     <ClCompile Include="hefty1.c" />
     <ClCompile Include="myriadgroestl.cpp" />
-    <ClCompile Include="lyra2\Lyra2.c" />
-    <ClCompile Include="lyra2\Sponge.c" />
     <ClCompile Include="sph\aes_helper.c" />
     <ClCompile Include="sph\blake.c" />
     <ClCompile Include="sph\bmw.c" />
@@ -348,11 +349,9 @@
     <ClInclude Include="sph\sph_types.h" />
     <ClInclude Include="sph\sph_whirlpool.h" />
     <ClInclude Include="sph\sysendian.h" />
+    <ClInclude Include="thebestcoin\Lyra2v2.h" />
+    <ClInclude Include="thebestcoin\Spongev2.h" />
     <ClInclude Include="uint256.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="lyra2\Lyra2.h" />
-    <ClInclude Include="lyra2\Sponge.h" />
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="bitcredit\bitcredit.cu" />
@@ -367,10 +366,6 @@
     </CudaCompile>
     <CudaCompile Include="cuda_nist5.cu">
     </CudaCompile>
-    <CudaCompile Include="lyra2\cuda_lyra2v2.cu">
-      <MaxRegCount Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">110</MaxRegCount>
-    </CudaCompile>
-    <CudaCompile Include="lyra2\lyra2REv2.cu" />
     <CudaCompile Include="scrypt\blake.cu" />
     <CudaCompile Include="scrypt\keccak.cu" />
     <CudaCompile Include="scrypt\nv_kernel2.cu">
@@ -465,10 +460,13 @@
     </CudaCompile>
     <CudaCompile Include="qubit\qubit_luffa512.cu">
     </CudaCompile>
-    <CudaCompile Include="lyra2\lyra2RE.cu" />
-    <CudaCompile Include="lyra2\cuda_lyra2.cu" />
     <CudaCompile Include="scrypt\titan_kernel.cu" />
     <CudaCompile Include="skein.cu" />
+    <CudaCompile Include="thebestcoin\cuda_thebestcoin.cu">
+      <GPUDebugInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GPUDebugInfo>
+      <FileType>Document</FileType>
+    </CudaCompile>
+    <CudaCompile Include="thebestcoin\thebestcoin.cu" />
     <CudaCompile Include="x11\cuda_x11_aes.cu">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </CudaCompile>

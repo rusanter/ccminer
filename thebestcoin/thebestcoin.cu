@@ -4,7 +4,7 @@ extern "C" {
 #include "sph/sph_skein.h"
 #include "sph/sph_keccak.h"
 #include "sph/sph_cubehash.h"
-#include "lyra2/Lyra2.h"
+#include "thebestcoin/Lyra2v2.h"
 }
 
 #include "miner.h"
@@ -62,7 +62,7 @@ extern "C" void thebestcoin_hash(void *state, const void *input)
 	sph_cubehash256_close(&ctx_cube, hashA);
 
 
-	LYRA2(hashB, 32, hashA, 32, hashA, 32, 1, 4, 4);
+	LYRA2V2(hashB, 32, hashA, 32, hashA, 32, 1, N_ROWS, N_COLS);
 
 	sph_skein256_init(&ctx_skein);
 	sph_skein256(&ctx_skein, hashB, 32);
@@ -88,6 +88,7 @@ extern "C" int scanhash_thebestcoin(int thr_id, uint32_t *pdata,
 {
 	const uint32_t first_nonce = pdata[19];
 	uint32_t intensity = 256 * 256 * 8;
+	//uint32_t intensity = 256 * 8;
 	uint32_t tpb = 8;
 //	bool mergeblakekeccak = false;
 	cudaDeviceProp props;
@@ -130,7 +131,7 @@ extern "C" int scanhash_thebestcoin(int thr_id, uint32_t *pdata,
 		tpb = 13;
 	}
 
-	uint32_t throughput = device_intensity(device_map[thr_id], __func__, intensity);
+	uint32_t throughput = device_intensity(device_map[thr_id], __func__, intensity); // 524288
 
 	if (opt_benchmark)
 		((uint32_t*)ptarget)[7] = 0x00ff;
@@ -146,7 +147,9 @@ extern "C" int scanhash_thebestcoin(int thr_id, uint32_t *pdata,
 		skein256_cpu_init(thr_id, throughput);
 		bmw256_cpu_init(thr_id, throughput);
 
-		CUDA_SAFE_CALL(cudaMalloc(&d_hash2[thr_id], 16 * 4 * 3 * sizeof(uint64_t) * throughput));
+		//                                          (12 * 8 * 4) * 4 = 1536
+		//CUDA_SAFE_CALL(cudaMalloc(&d_hash2[thr_id], 16 * 4 * 3 * sizeof(uint64_t) * throughput));
+		CUDA_SAFE_CALL(cudaMalloc(&d_hash2[thr_id], ROW_LEN_BYTES * N_ROWS * throughput));
 		thebestcoin_cpu_init(thr_id, throughput, d_hash2[thr_id]);
 		CUDA_SAFE_CALL(cudaMalloc(&d_hash[thr_id], 8 * sizeof(uint32_t) * throughput));
 		init[thr_id] = true;
@@ -172,11 +175,38 @@ extern "C" int scanhash_thebestcoin(int thr_id, uint32_t *pdata,
 			keccak256_cpu_hash_32(thr_id, throughput, pdata[19], d_hash[thr_id]);
 		}
 */
+
 		cubehash256_cpu_hash_32(thr_id, throughput, pdata[19], d_hash[thr_id]);
+
+		//applog(LOG_INFO, "throughput = %u, tpb = %u", throughput, tpb);
+
+		//int64_t data[4];
+		//cudaMemcpy(data, d_hash[0], sizeof(int64_t), cudaMemcpyDeviceToHost);
+		//cudaMemcpy(&data[1], d_hash[0 + 1 * throughput], sizeof(int64_t), cudaMemcpyDeviceToHost);
+		//cudaMemcpy(&data[2], d_hash[0 + 2 * throughput], sizeof(int64_t), cudaMemcpyDeviceToHost);
+		//cudaMemcpy(&data[3], d_hash[0 + 3 * throughput], sizeof(int64_t), cudaMemcpyDeviceToHost);
+		//if (opt_benchmark) applog(LOG_INFO, "lyra2v2 (thebestCoin) returned %08x %08x %08x %08x", data[0], data[1], data[2], data[3]);
+
 		thebestcoin_cpu_hash_32(thr_id, throughput, pdata[19], d_hash[thr_id], tpb);
+
+		cudaError_t cer = cudaGetLastError();
+		if (cer != cudaSuccess) {
+			applog(LOG_INFO, "Cuda error (thebestcoin_cpu_hash_32): %s", cudaGetErrorString(cer));
+			scan_abort_flag = true;
+			break;
+		}
+
+		//int64_t data[4];
+		//cudaMemcpy(&data[0], &(d_hash[thr_id][0]), sizeof(int64_t), cudaMemcpyDeviceToHost);
+		//cudaMemcpy(&data[1], &(d_hash[thr_id][0 + 1 * throughput]), sizeof(int64_t), cudaMemcpyDeviceToHost);
+		//cudaMemcpy(&data[2], &(d_hash[thr_id][0 + 2 * throughput]), sizeof(int64_t), cudaMemcpyDeviceToHost);
+		//cudaMemcpy(&data[3], &(d_hash[thr_id][0 + 3 * throughput]), sizeof(int64_t), cudaMemcpyDeviceToHost);
+		//if (opt_benchmark) applog(LOG_INFO, "thebestcoin_cpu_hash_32 returned %08x %08x %08x %08x", data[0], data[1], data[2], data[3]);
+
 		skein256_cpu_hash_32(thr_id, throughput, pdata[19], d_hash[thr_id]);
 		cubehash256_cpu_hash_32(thr_id, throughput, pdata[19], d_hash[thr_id]);
 		bmw256_cpu_hash_32(thr_id, throughput, pdata[19], d_hash[thr_id], foundNonce, ptarget[7]);
+
 		//		foundNonce[0] = 0xffffffff;
 		if (foundNonce[0] != 0xffffffff)
 		{
