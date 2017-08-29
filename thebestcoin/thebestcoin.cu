@@ -87,8 +87,9 @@ extern "C" int scanhash_thebestcoin(int thr_id, uint32_t *pdata,
 	unsigned long *hashes_done)
 {
 	const uint32_t first_nonce = pdata[19];
-	//uint32_t intensity = 256 * 256 * 8;
-	uint32_t intensity = 256 * 256 * 2;
+	//uint32_t intensity = 256 * 256 * 8; // = 524288 * 1536 / 1048576 = 768 MB
+	//uint32_t intensity = 256 * 256 * 2; // = 131072 * 6144 / 1048576 = 768 MB
+	uint32_t intensity = 256 * 256 * 2;   // = 131072 * 12288 / 1048576 = 1536 MB
 	uint32_t tpb = 8;
 //	bool mergeblakekeccak = false;
 	cudaDeviceProp props;
@@ -134,7 +135,7 @@ extern "C" int scanhash_thebestcoin(int thr_id, uint32_t *pdata,
 	uint32_t throughput = device_intensity(device_map[thr_id], __func__, intensity); // 524288
 
 	if (opt_benchmark)
-		((uint32_t*)ptarget)[7] = 0x00ff;
+		((uint32_t*)ptarget)[7] = 0x07ff;
 	if (!init[thr_id])
 	{
 		cudaSetDevice(device_map[thr_id]);

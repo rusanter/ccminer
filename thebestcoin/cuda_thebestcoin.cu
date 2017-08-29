@@ -7,8 +7,8 @@
 #define TPB50 64
 
  
-#define Nrow 8
-#define Ncol 8
+#define Nrow 32
+#define Ncol 4
 #define N_ROWS Nrow
 #define N_COLS Ncol
 #define u64type uint2
