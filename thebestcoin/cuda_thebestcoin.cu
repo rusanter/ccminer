@@ -8,7 +8,7 @@
 
  
 #define Nrow 32
-#define Ncol 4
+#define Ncol 32
 #define N_ROWS Nrow
 #define N_COLS Ncol
 #define u64type uint2

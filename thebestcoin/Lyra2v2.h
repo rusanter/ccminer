@@ -25,7 +25,7 @@
 typedef unsigned char byte ;
 
 #ifndef N_COLS
-        #define N_COLS 4                                        //Number of columns in the memory matrix
+        #define N_COLS 32                                       //Number of columns in the memory matrix
 #endif
 
 #ifndef N_ROWS
