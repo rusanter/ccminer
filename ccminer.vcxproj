@@ -107,7 +107,7 @@
       <PtxAsOptionV>true</PtxAsOptionV>
       <Keep>false</Keep>
       <CodeGeneration>compute_50,sm_50</CodeGeneration>
-      <GPUDebugInfo>false</GPUDebugInfo>
+      <GPUDebugInfo>true</GPUDebugInfo>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
