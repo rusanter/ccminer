@@ -24,6 +24,7 @@
 #include <omp.h>
 
 #include "Lyra2v2.h"
+#include "lyra2_params.h"
 #include "Spongev2.h"
 #include "Spongev2.c"
 

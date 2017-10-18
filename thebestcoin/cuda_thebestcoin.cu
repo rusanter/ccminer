@@ -3,37 +3,25 @@
 #include <stdio.h>
 #include <memory.h>
 #include "cuda_vector.h"
+#include "lyra2_params.h"
 #define TPB52 256
 #define TPB50 64
 
- 
-#define Nrow 4
-#define Ncol 4
-#define N_ROWS Nrow
-#define N_COLS Ncol
+#define N_ROWS LYRA2_ROWS
+#define N_COLS LYRA2_COLS
+#define timeCost LYRA2_TCOST
 #define u64type uint2
 #define vectype uint28
 #define memshift 3
 __device__ uint64_t  *DMatrix;
 
-#define nPARALLEL 1
 #define STATESIZE_INT64 16
 #define STATESIZE_BYTES (STATESIZE_INT64 * sizeof (uint64_t))
-#define RHO 1
-#define BLOCK_LEN_INT64 12                                      //Block length: 768 bits (=96 bytes, =12 uint64_t)
-#define BLOCK_LEN_BYTES (BLOCK_LEN_INT64 * 8)                   //Block length, in bytes
-#define ROW_LEN_INT64 (BLOCK_LEN_INT64 * Ncol)                  //Total length of a row: N_COLS blocks
-#define ROW_LEN_BYTES (ROW_LEN_INT64 * 8)                       //Number of bytes per row
-//Block length required so Blake2's Initialization Vector (IV) is not overwritten (THIS SHOULD NOT BE MODIFIED)
-#define BLOCK_LEN_BLAKE2_SAFE_INT64 8                                   //512 bits (=64 bytes, =8 uint64_t)
-#define BLOCK_LEN_BLAKE2_SAFE_BYTES (BLOCK_LEN_BLAKE2_SAFE_INT64 * 8)   //same as above, in bytes
+#define RHO LYRA2_RHO
 
 #define pwdlen   0x20
 #define saltlen  0x20
 #define kLen     0x20
-#define timeCost 1
-#define nRows    Nrow
-#define nCols    Ncol
 
 typedef unsigned char byte;
 
@@ -411,15 +399,15 @@ __device__ void wanderingPhaseGPU2_P1(uint64_t * memMatrixGPU, uint64_t * stateL
 
 	if (threadNumber < (nPARALLEL)) {
 		//Visitation Loop
-		for (wCont = 0; wCont < timeCost * nRows; wCont++) {
+		for (wCont = 0; wCont < timeCost * N_ROWS; wCont++) {
 			//Selects a pseudorandom indices row0 and row1
 			//------------------------------------------------------------------------------------------
 			//(USE THIS IF window IS A POWER OF 2)
-			//row0 = (((uint64_t)stateLocal[0]) & (nRows-1));
-			//row1 = (((uint64_t)stateLocal[2]) & (nRows-1));
+			//row0 = (((uint64_t)stateLocal[0]) & (N_ROWS-1));
+			//row1 = (((uint64_t)stateLocal[2]) & (N_ROWS-1));
 			//(USE THIS FOR THE "GENERIC" CASE)
-			row0 = ((uint64_t)stateLocal[0]) % nRows;  //row0 = lsw(rand) mod nRows
-			row1 = ((uint64_t)stateLocal[2]) % nRows;  //row1 = lsw(rot(rand)) mod nRows
+			row0 = ((uint64_t)stateLocal[0]) % N_ROWS;  //row0 = lsw(rand) mod N_ROWS
+			row1 = ((uint64_t)stateLocal[2]) % N_ROWS;  //row1 = lsw(rot(rand)) mod N_ROWS
 			//we rotate 2 words for compatibility with the SSE implementation
 
 			//Performs a reduced-round duplexing operation over "M[row0][col] [+] M[row1][col] [+] M[prev0][col0] [+] M[prev1][col1], updating both M[row0] and M[row1]
@@ -554,13 +542,13 @@ void thebestcoin_gpu_hash_32(uint32_t threads, uint32_t startNounce, uint2 *outp
 
     // Size of each chunk that each thread will work with
     //updates global sizeSlicedRows;
-    sizeSlicedRows = (Nrow / nPARALLEL) * ROW_LEN_INT64;
+    sizeSlicedRows = (N_ROWS / nPARALLEL) * ROW_LEN_INT64;
 
     uint64_t stateLocal[16];
 
     if (thread < threads)
     {
-		const uint32_t ps = (ROW_LEN_INT64 * Nrow * thread);
+		const uint32_t ps = (ROW_LEN_INT64 * N_ROWS * thread);
         const uint64_t stateIdxGPU = 0;                            // TODO get rid of this?
         const uint64_t nBlocksInput = ((saltlen + pwdlen + 6 * sizeof (int)) / BLOCK_LEN_BLAKE2_SAFE_BYTES) + 1; // = 2
         uint64_t *memMatrixGPU = (DMatrix + ps);
@@ -602,8 +590,8 @@ void thebestcoin_gpu_hash_32(uint32_t threads, uint32_t startNounce, uint2 *outp
 		((int *)ptrByte)[1] = pwdlen;
 		((int *)ptrByte)[2] = saltlen;
 		((int *)ptrByte)[3] = timeCost;
-		((int *)ptrByte)[4] = nRows;
-		((int *)ptrByte)[5] = nCols;
+		((int *)ptrByte)[4] = N_ROWS;
+		((int *)ptrByte)[5] = N_COLS;
 
 		//memcpy(&outputHash[thread + 0 * threads], ptrByte, sizeof(uint64_t));
 		//memcpy(&outputHash[thread + 1 * threads], ptrByte + 8, sizeof(uint64_t));
@@ -635,7 +623,7 @@ void thebestcoin_gpu_hash_32(uint32_t threads, uint32_t startNounce, uint2 *outp
 		
 		//============================ Setup, Wandering Phase and Wrap-up =============================//
 		//================================ Setup Phase ==================================//
-		//==Initializes a (nRows x nCols) memory matrix, it's cells having b bits each)==//
+		//==Initializes a (N_ROWS x N_COLS) memory matrix, it's cells having b bits each)==//
 		//============================ Wandering Phase =============================//
 		//=====Iteratively overwrites pseudorandom cells of the memory matrix=======//
 		//============================ Wrap-up Phase ===============================//
@@ -652,7 +640,7 @@ void thebestcoin_gpu_hash_32(uint32_t threads, uint32_t startNounce, uint2 *outp
 		uint64_t row1 = 1;   //row1: revisited during Setup, and then read [and written]; randomly picked during Wandering
 		uint64_t prev1 = 0;  //prev1: stores the previous value of row1
 
-		for (row0 = 3; row0 < nRows; row0++) {
+		for (row0 = 3; row0 < N_ROWS; row0++) {
 			//Performs a reduced-round duplexing operation over "M[row1][col] [+] M[prev0][col] [+] M[prev1][col]", filling M[row0] and updating M[row1]
 			//M[row0][N_COLS-1-col] = M[prev0][col] XOR rand;
 			//M[row1][col] = M[row1][col] XOR rot(rand)                    rot(): right rotation by 'omega' bits (e.g., 1 or more words)

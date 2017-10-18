@@ -24,21 +24,6 @@
 
 typedef unsigned char byte ;
 
-#ifndef N_COLS
-        #define N_COLS 4                                        //Number of columns in the memory matrix
-#endif
-
-#ifndef N_ROWS
-		#define N_ROWS 4                                        //Number of rows in the memory matrix
-#endif
-
-#ifndef nPARALLEL
-        #define nPARALLEL 1                                     //Number of parallel threads
-#endif
-
-#define ROW_LEN_INT64 (BLOCK_LEN_INT64 * N_COLS)                //Total length of a row: N_COLS blocks
-#define ROW_LEN_BYTES (ROW_LEN_INT64 * 8)                       //Number of bytes per row
-
 int LYRA2V2(void *K, unsigned int kLen, const void *pwd, unsigned int pwdlen, const void *salt, unsigned int saltlen, unsigned int timeCost, unsigned int nRows, unsigned int nCols);
 
 #endif /* LYRA2V2_H_ */

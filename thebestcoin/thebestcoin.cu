@@ -9,6 +9,7 @@ extern "C" {
 
 #include "miner.h"
 #include "cuda_helper.h"
+#include "lyra2_params.h"
 
 
 static _ALIGN(64) uint64_t *d_hash[MAX_GPUS];
@@ -62,7 +63,7 @@ extern "C" void thebestcoin_hash(void *state, const void *input)
 	sph_cubehash256_close(&ctx_cube, hashA);
 
 
-	LYRA2V2(hashB, 32, hashA, 32, hashA, 32, 1, N_ROWS, N_COLS);
+	LYRA2V2(hashB, 32, hashA, 32, hashA, 32, LYRA2_TCOST, LYRA2_ROWS, LYRA2_COLS);
 
 	sph_skein256_init(&ctx_skein);
 	sph_skein256(&ctx_skein, hashB, 32);
@@ -88,50 +89,24 @@ extern "C" int scanhash_thebestcoin(int thr_id, uint32_t *pdata,
 {
 	const uint32_t first_nonce = pdata[19];
 	uint32_t intensity = 256 * 256 * 8;
-	//uint32_t intensity = 256 * 8;
 	uint32_t tpb = 8;
 //	bool mergeblakekeccak = false;
 	cudaDeviceProp props;
 	cudaGetDeviceProperties(&props, device_map[thr_id]);
-	if (strstr(props.name, "970"))
-	{
-		tpb = 10;
-		intensity = 256 * 256 * 20;
-	}
-	else if (strstr(props.name, "980 Ti"))
-	{
-		tpb = 10;
-		intensity = 256 * 256 * 18;
-	}
-	else if (strstr(props.name, "980"))
-	{
-		tpb = 10;
-		intensity = 256 * 256 * 18;
-	}
-	else if (strstr(props.name, "750 Ti"))
-	{
-		intensity = 256 * 256 * 10;
-		tpb = 16;
-//		mergeblakekeccak = true;
-	}
-	else if (strstr(props.name, "750"))
-	{
-		intensity = 256 * 256 * 5;
-		tpb = 16;
-//		mergeblakekeccak = true;
-	}
-	else if (strstr(props.name, "960"))
-	{
-		tpb = 9;
-		intensity = 256 * 256 * 18;
-	}
-	else if (strstr(props.name, "950"))
-	{
-		intensity = 256 * 256 * 18;
-		tpb = 13;
-	}
 
-	uint32_t throughput = device_intensity(device_map[thr_id], __func__, intensity); // 524288
+	// calculate intensity depending of algo params, may not work for some params and GPUs
+	unsigned int vram = 1024 * 1024 * 1536; // 1,5GB VRAM
+	unsigned int msize = BLOCK_LEN_BYTES * LYRA2_COLS * LYRA2_ROWS; // Matrix size
+	intensity = (vram / msize);
+
+	// Values of tpb and intensity can be changed for specific video card to tune performance
+	//if (strstr(props.name, "980 Ti"))
+	//{
+	//	tpb = 10;
+	//	intensity = 256 * 256 * 18;
+	//}
+
+	uint32_t throughput = device_intensity(device_map[thr_id], __func__, intensity);
 
 	if (opt_benchmark)
 		((uint32_t*)ptarget)[7] = 0x00ff;
@@ -147,9 +122,11 @@ extern "C" int scanhash_thebestcoin(int thr_id, uint32_t *pdata,
 		skein256_cpu_init(thr_id, throughput);
 		bmw256_cpu_init(thr_id, throughput);
 
-		//                                          (12 * 8 * 4) * 4 = 1536
-		//CUDA_SAFE_CALL(cudaMalloc(&d_hash2[thr_id], 16 * 4 * 3 * sizeof(uint64_t) * throughput));
-		CUDA_SAFE_CALL(cudaMalloc(&d_hash2[thr_id], ROW_LEN_BYTES * N_ROWS * throughput));
+		applog(LOG_INFO, "GPU #%d: lyra2 params set to R = %d, C = %d, T = %d", thr_id, LYRA2_ROWS, LYRA2_COLS, LYRA2_TCOST);
+		applog(LOG_INFO, "GPU #%d: allocating %d MB memory for DMatrix (%d B per thread)", thr_id, ROW_LEN_BYTES * LYRA2_ROWS * throughput / 1048576, ROW_LEN_BYTES * LYRA2_ROWS);
+		applog(LOG_INFO, "GPU #%d: throughput is set to %d, tpb = %d", thr_id, throughput, tpb);
+
+		CUDA_SAFE_CALL(cudaMalloc(&d_hash2[thr_id], ROW_LEN_BYTES * LYRA2_ROWS * throughput)); // todo is d_hash2 used now?
 		thebestcoin_cpu_init(thr_id, throughput, d_hash2[thr_id]);
 		CUDA_SAFE_CALL(cudaMalloc(&d_hash[thr_id], 8 * sizeof(uint32_t) * throughput));
 		init[thr_id] = true;
@@ -164,6 +141,7 @@ extern "C" int scanhash_thebestcoin(int thr_id, uint32_t *pdata,
 	do {
 		uint32_t foundNonce[2] = { 0, 0 };
 
+		// Separate calculation may be faster on some GPUs
 //		if (mergeblakekeccak)
 //		{
 			blakeKeccak256_cpu_hash_80(thr_id, throughput, pdata[19], d_hash[thr_id]);
@@ -178,15 +156,6 @@ extern "C" int scanhash_thebestcoin(int thr_id, uint32_t *pdata,
 
 		cubehash256_cpu_hash_32(thr_id, throughput, pdata[19], d_hash[thr_id]);
 
-		//applog(LOG_INFO, "throughput = %u, tpb = %u", throughput, tpb);
-
-		//int64_t data[4];
-		//cudaMemcpy(data, d_hash[0], sizeof(int64_t), cudaMemcpyDeviceToHost);
-		//cudaMemcpy(&data[1], d_hash[0 + 1 * throughput], sizeof(int64_t), cudaMemcpyDeviceToHost);
-		//cudaMemcpy(&data[2], d_hash[0 + 2 * throughput], sizeof(int64_t), cudaMemcpyDeviceToHost);
-		//cudaMemcpy(&data[3], d_hash[0 + 3 * throughput], sizeof(int64_t), cudaMemcpyDeviceToHost);
-		//if (opt_benchmark) applog(LOG_INFO, "lyra2v2 (thebestCoin) returned %08x %08x %08x %08x", data[0], data[1], data[2], data[3]);
-
 		thebestcoin_cpu_hash_32(thr_id, throughput, pdata[19], d_hash[thr_id], tpb);
 
 		cudaError_t cer = cudaGetLastError();
@@ -196,18 +165,10 @@ extern "C" int scanhash_thebestcoin(int thr_id, uint32_t *pdata,
 			break;
 		}
 
-		//int64_t data[4];
-		//cudaMemcpy(&data[0], &(d_hash[thr_id][0]), sizeof(int64_t), cudaMemcpyDeviceToHost);
-		//cudaMemcpy(&data[1], &(d_hash[thr_id][0 + 1 * throughput]), sizeof(int64_t), cudaMemcpyDeviceToHost);
-		//cudaMemcpy(&data[2], &(d_hash[thr_id][0 + 2 * throughput]), sizeof(int64_t), cudaMemcpyDeviceToHost);
-		//cudaMemcpy(&data[3], &(d_hash[thr_id][0 + 3 * throughput]), sizeof(int64_t), cudaMemcpyDeviceToHost);
-		//if (opt_benchmark) applog(LOG_INFO, "thebestcoin_cpu_hash_32 returned %08x %08x %08x %08x", data[0], data[1], data[2], data[3]);
-
 		skein256_cpu_hash_32(thr_id, throughput, pdata[19], d_hash[thr_id]);
 		cubehash256_cpu_hash_32(thr_id, throughput, pdata[19], d_hash[thr_id]);
 		bmw256_cpu_hash_32(thr_id, throughput, pdata[19], d_hash[thr_id], foundNonce, ptarget[7]);
 
-		//		foundNonce[0] = 0xffffffff;
 		if (foundNonce[0] != 0xffffffff)
 		{
 			const uint32_t Htarg = ptarget[7];

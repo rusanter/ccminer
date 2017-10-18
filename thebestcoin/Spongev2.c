@@ -23,6 +23,10 @@
 
 #include "Spongev2.h"
 #include "Lyra2v2.h"
+#include "lyra2_params.h"
+
+#define N_COLS LYRA2_COLS
+#define RHO LYRA2_RHO
 
 /**
  * Execute G function, with all 12 rounds for Blake2 and  BlaMka, and 24 round for half-round BlaMka.

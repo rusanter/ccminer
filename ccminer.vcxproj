@@ -350,6 +350,7 @@
     <ClInclude Include="sph\sph_whirlpool.h" />
     <ClInclude Include="sph\sysendian.h" />
     <ClInclude Include="thebestcoin\Lyra2v2.h" />
+    <ClInclude Include="thebestcoin\lyra2_params.h" />
     <ClInclude Include="thebestcoin\Spongev2.h" />
     <ClInclude Include="uint256.h" />
   </ItemGroup>

@@ -47,10 +47,6 @@
         #define SPONGE 0                                                //SPONGE 0 = BLAKE2, SPONGE 1 = BLAMKA and SPONGE 2 = HALF-ROUND BLAMKA
 #endif
 
-#ifndef RHO
-        #define RHO 1                                                   //Number of reduced rounds performed
-#endif
-
 /*Blake2b IV Array*/
 static const uint64_t blake2b_IV[8] =
 {

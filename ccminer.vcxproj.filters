@@ -370,6 +370,7 @@
     <ClInclude Include="log.h" />
     <ClInclude Include="thebestcoin\Lyra2v2.h" />
     <ClInclude Include="thebestcoin\Spongev2.h" />
+    <ClInclude Include="thebestcoin\lyra2_params.h" />
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="cuda.cpp">
