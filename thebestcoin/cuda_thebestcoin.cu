@@ -69,6 +69,45 @@ __device__ static inline uint64_t rotr64( const uint64_t w, const unsigned c ){
     G(r,6,v[ 2],v[ 7],v[ 8],v[13]); \
     G(r,7,v[ 3],v[ 4],v[ 9],v[14]);
 
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+#define OPT_LYRA
+
+#if defined(OPT_LYRA)
+//#define OPT_LYRA_ROUND // Intrinsic-optimized version of lyra2 round: -8%
+#define OPT_LYRA_UNROLL // Unroll loops: +22..25%
+#endif // defined(OPT_LYRA)
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+__device__ __forceinline__ void Gfunc_v35(uint2 & a, uint2 & b, uint2 & c, uint2 & d)
+{
+    a += b; d = eorswap32 (a, d);
+    c += d; b ^= c; b = ROR24(b);
+    a += b; d ^= a; d = ROR16(d);
+    c += d; b ^= c; b = ROR2(b, 63);
+}
+
+__device__ __forceinline__ void round_lyra_v35(vectype* s)
+{
+    Gfunc_v35(s[0].x, s[1].x, s[2].x, s[3].x);
+    Gfunc_v35(s[0].y, s[1].y, s[2].y, s[3].y);
+    Gfunc_v35(s[0].z, s[1].z, s[2].z, s[3].z);
+    Gfunc_v35(s[0].w, s[1].w, s[2].w, s[3].w);
+
+    Gfunc_v35(s[0].x, s[1].y, s[2].z, s[3].w);
+    Gfunc_v35(s[0].y, s[1].z, s[2].w, s[3].x);
+    Gfunc_v35(s[0].z, s[1].w, s[2].x, s[3].y);
+    Gfunc_v35(s[0].w, s[1].x, s[2].y, s[3].z);
+}
+
+#if defined(OPT_LYRA_ROUND)
+#undef ROUND_LYRA
+#define ROUND_LYRA(r)  round_lyra_v35((vectype*)v)
+#endif // defined(OPT_LYRA_ROUND)
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+
 /**
  * Execute G function, with all 12 rounds for Blake2 and  BlaMka, and 24 round for half-round BlaMka.
  *
@@ -146,7 +185,13 @@ __device__ void reducedSqueezeRow0(uint64_t* rowOut, uint64_t* state) {
         uint64_t* ptrWord = &rowOut[sliceStart + (N_COLS - 1) * BLOCK_LEN_INT64]; //In Lyra2: pointer to M[0][C-1]
         int i, j;
         //M[0][C-1-col] = H.reduced_squeeze()
+#if defined(OPT_LYRA_UNROLL)
+#pragma unroll
+#endif //defined(OPT_LYRA_UNROLL)
         for (i = 0; i < N_COLS; i++) {
+#if defined(OPT_LYRA_UNROLL)
+#pragma unroll
+#endif //defined(OPT_LYRA_UNROLL)
             for (j = 0; j < BLOCK_LEN_INT64; j++) {
                 ptrWord[j] = state[stateStart + j];
             }
@@ -187,8 +232,14 @@ __device__ void reducedDuplexRow1and2(uint64_t *rowIn, uint64_t *state, unsigned
 		//Row to receive the sponge's output
 		uint64_t* ptrWordOut = (uint64_t*)& rowIn[sliceStart + second * ROW_LEN_INT64 + (N_COLS - 1) * BLOCK_LEN_INT64];       //In Lyra2: pointer to row
 
+#if defined(OPT_LYRA_UNROLL)
+#pragma unroll
+#endif //defined(OPT_LYRA_UNROLL)
 		for (i = 0; i < N_COLS; i++) {
 			//Absorbing "M[0][col]"
+#if defined(OPT_LYRA_UNROLL)
+#pragma unroll
+#endif //defined(OPT_LYRA_UNROLL)
 			for (j = 0; j < BLOCK_LEN_INT64; j++) {
 				state[stateStart + j] ^= (ptrWordIn[j]);
 			}
@@ -197,6 +248,9 @@ __device__ void reducedDuplexRow1and2(uint64_t *rowIn, uint64_t *state, unsigned
 			reducedSpongeLyra(&state[stateStart]);
 
 			//M[1][C-1-col] = M[1][col] XOR rand
+#if defined(OPT_LYRA_UNROLL)
+#pragma unroll
+#endif //defined(OPT_LYRA_UNROLL)
 			for (j = 0; j < BLOCK_LEN_INT64; j++) {
 				ptrWordOut[j] = ptrWordIn[j] ^ state[stateStart + j];
 			}
@@ -232,6 +286,9 @@ __device__ void absorbRandomColumn(uint64_t *in, uint64_t *state, uint64_t row0,
 		uint64_t* ptrWordIn = (uint64_t*)& in[sliceStart + (row0 * ROW_LEN_INT64) + randomColumn0];
 
 		//absorbs the column picked
+#if defined(OPT_LYRA_UNROLL)
+#pragma unroll
+#endif //defined(OPT_LYRA_UNROLL)
 		for (i = 0; i < BLOCK_LEN_INT64; i++) {
 			state[stateStart + i] ^= ptrWordIn[i];
 		}
@@ -337,6 +394,9 @@ __device__ void reducedDuplexRowWanderingOTM_P1(uint64_t *memMatrixGPU, uint64_t
 
 		int i, j;
 
+#if defined(OPT_LYRA_UNROLL)
+#pragma unroll
+#endif //defined(OPT_LYRA_UNROLL)
 		for (i = 0; i < N_COLS; i++) {
 			//col0 = lsw(rot^2(rand)) mod N_COLS
 			//randomColumn0 = ((uint64_t)stateLocal[4] & (N_COLS-1))*BLOCK_LEN_INT64;           /*(USE THIS IF N_COLS IS A POWER OF 2)*/
@@ -349,6 +409,9 @@ __device__ void reducedDuplexRowWanderingOTM_P1(uint64_t *memMatrixGPU, uint64_t
 			ptrWordIn1 = (uint64_t *)& memMatrixGPU[(prev1 * ROW_LEN_INT64) + randomColumn1];
 
 			//Absorbing "M[row0] [+] M[row1] [+] M[prev0] [+] M[prev1]"
+#if defined(OPT_LYRA_UNROLL)
+#pragma unroll
+#endif //defined(OPT_LYRA_UNROLL)
 			for (j = 0; j < BLOCK_LEN_INT64; j++) {
 				stateLocal[j] ^= (ptrWordInOut0[j] + ptrWordInOut1[j] + ptrWordIn0[j] + ptrWordIn1[j]);
 			}
@@ -357,6 +420,9 @@ __device__ void reducedDuplexRowWanderingOTM_P1(uint64_t *memMatrixGPU, uint64_t
 			reducedSpongeLyra(stateLocal);
 
 			//M[rowInOut0][col] = M[rowInOut0][col] XOR rand
+#if defined(OPT_LYRA_UNROLL)
+#pragma unroll
+#endif //defined(OPT_LYRA_UNROLL)
 			for (j = 0; j < BLOCK_LEN_INT64; j++) {
 				ptrWordInOut0[j] ^= stateLocal[j];
 			}
@@ -364,6 +430,9 @@ __device__ void reducedDuplexRowWanderingOTM_P1(uint64_t *memMatrixGPU, uint64_t
 			//M[rowInOut1][col] = M[rowInOut1][col] XOR rot(rand)
 			//rot(): right rotation by 'omega' bits (e.g., 1 or more words)
 			//we rotate 2 words for compatibility with the SSE implementation
+#if defined(OPT_LYRA_UNROLL)
+#pragma unroll
+#endif //defined(OPT_LYRA_UNROLL)
 			for (j = 0; j < BLOCK_LEN_INT64; j++) {
 				ptrWordInOut1[j] ^= stateLocal[(j + 2) % BLOCK_LEN_INT64];
 			}
@@ -461,8 +530,14 @@ __device__ void reducedDuplexRowFilling2OTM_P1(uint64_t *stateLocal, uint64_t *m
 		//Row receiving the output (rowOut or M[row0])
 		uint64_t* ptrWordOut = (uint64_t *)& memMatrixGPU[(row0 * ROW_LEN_INT64) + ((N_COLS - 1) * BLOCK_LEN_INT64)]; //In Lyra2: pointer to row0, to be initialized
 
+#if defined(OPT_LYRA_UNROLL)
+#pragma unroll
+#endif //defined(OPT_LYRA_UNROLL)
 		for (i = 0; i < N_COLS; i++) {
 			//Absorbing "M[row1] [+] M[prev0] [+] M[prev1]"
+#if defined(OPT_LYRA_UNROLL)
+#pragma unroll
+#endif //defined(OPT_LYRA_UNROLL)
 			for (j = 0; j < BLOCK_LEN_INT64; j++) {
 				stateLocal[j] ^= (ptrWordInOut[j] + ptrWordIn0[j] + ptrWordIn1[j]);
 			}
@@ -471,6 +546,9 @@ __device__ void reducedDuplexRowFilling2OTM_P1(uint64_t *stateLocal, uint64_t *m
 			reducedSpongeLyra(stateLocal);
 
 			//M[row0][col] = M[prev0][col] XOR rand
+#if defined(OPT_LYRA_UNROLL)
+#pragma unroll
+#endif //defined(OPT_LYRA_UNROLL)
 			for (j = 0; j < BLOCK_LEN_INT64; j++) {
 				ptrWordOut[j] = ptrWordIn0[j] ^ stateLocal[j];
 			}
@@ -478,6 +556,9 @@ __device__ void reducedDuplexRowFilling2OTM_P1(uint64_t *stateLocal, uint64_t *m
 			//M[row1][col] = M[row1][col] XOR rot(rand)
 			//rot(): right rotation by 'omega' bits (e.g., 1 or more words)
 			//we rotate 2 words for compatibility with the SSE implementation
+#if defined(OPT_LYRA_UNROLL)
+#pragma unroll
+#endif //defined(OPT_LYRA_UNROLL)
 			for (j = 0; j < BLOCK_LEN_INT64; j++) {
 				ptrWordInOut[j] ^= stateLocal[(j + 2) % BLOCK_LEN_INT64];
 			}
@@ -640,6 +721,9 @@ void thebestcoin_gpu_hash_32(uint32_t threads, uint32_t startNounce, uint2 *outp
 		uint64_t row1 = 1;   //row1: revisited during Setup, and then read [and written]; randomly picked during Wandering
 		uint64_t prev1 = 0;  //prev1: stores the previous value of row1
 
+#if defined(OPT_LYRA_UNROLL)
+#pragma unroll
+#endif //defined(OPT_LYRA_UNROLL)
 		for (row0 = 3; row0 < N_ROWS; row0++) {
 			//Performs a reduced-round duplexing operation over "M[row1][col] [+] M[prev0][col] [+] M[prev1][col]", filling M[row0] and updating M[row1]
 			//M[row0][N_COLS-1-col] = M[prev0][col] XOR rand;

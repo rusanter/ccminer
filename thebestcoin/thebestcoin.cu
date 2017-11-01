@@ -106,6 +106,11 @@ extern "C" int scanhash_thebestcoin(int thr_id, uint32_t *pdata,
 	//	intensity = 256 * 256 * 18;
 	//}
 
+//    intensity = 1024 * 1024;
+//    tpb = 13;
+    intensity = 128 * 1024;
+    tpb = 29;
+
 	uint32_t throughput = device_intensity(device_map[thr_id], __func__, intensity);
 
 	if (opt_benchmark)
