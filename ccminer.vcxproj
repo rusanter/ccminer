@@ -260,6 +260,8 @@
     <ClCompile Include="sph\sph_sha2.c" />
     <ClCompile Include="scrypt-jane.cpp" />
     <ClCompile Include="scrypt.cpp" />
+    <ClCompile Include="thebestcoinccm\Lyra2.c" />
+    <ClCompile Include="thebestcoinccm\Sponge.c" />
     <ClCompile Include="thebestcoin\Lyra2v2.c" />
     <ClCompile Include="thebestcoin\Spongev2.c" />
     <ClCompile Include="util.cpp" />
@@ -349,6 +351,10 @@
     <ClInclude Include="sph\sph_types.h" />
     <ClInclude Include="sph\sph_whirlpool.h" />
     <ClInclude Include="sph\sysendian.h" />
+    <ClInclude Include="thebestcoinccm\gpu_32_32.h" />
+    <ClInclude Include="thebestcoinccm\Lyra2.h" />
+    <ClInclude Include="thebestcoinccm\lyra2_params.h" />
+    <ClInclude Include="thebestcoinccm\Sponge.h" />
     <ClInclude Include="thebestcoin\Lyra2v2.h" />
     <ClInclude Include="thebestcoin\lyra2_params.h" />
     <ClInclude Include="thebestcoin\Spongev2.h" />
@@ -461,6 +467,8 @@
     </CudaCompile>
     <CudaCompile Include="scrypt\titan_kernel.cu" />
     <CudaCompile Include="skein.cu" />
+    <CudaCompile Include="thebestcoinccm\gpu_32_32.cu" />
+    <CudaCompile Include="thebestcoinccm\thebestcoinccm.cu" />
     <CudaCompile Include="thebestcoin\cuda_thebestcoin.cu">
       <GPUDebugInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GPUDebugInfo>
       <FileType>Document</FileType>

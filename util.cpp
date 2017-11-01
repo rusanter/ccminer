@@ -1562,6 +1562,10 @@ void print_hash_tests(void)
 	printpfx("thebestcoin", hash);
 
 	memset(hash, 0, sizeof hash);
+	thebestcoinccm_hash(&hash[0], &buf[0]);
+	printpfx("thebestcoinccm", hash);
+
+	memset(hash, 0, sizeof hash);
 	blake256hash(&hash[0], &buf[0], 8);
 	printpfx("blakecoin", hash);
 

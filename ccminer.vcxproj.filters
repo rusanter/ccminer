@@ -73,6 +73,9 @@
     <Filter Include="Source Files\CUDA\Lyra2">
       <UniqueIdentifier>{03b56ddb-6ebb-40b7-9a62-0a22c8c2865f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\thebestcoinccm">
+      <UniqueIdentifier>{236ba524-752c-4054-b50c-bbfa5e277188}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="compat\jansson\dump.c">
@@ -229,6 +232,12 @@
     </ClCompile>
     <ClCompile Include="thebestcoin\Lyra2v2.c" />
     <ClCompile Include="thebestcoin\Spongev2.c" />
+    <ClCompile Include="thebestcoinccm\Lyra2.c">
+      <Filter>Source Files\thebestcoinccm</Filter>
+    </ClCompile>
+    <ClCompile Include="thebestcoinccm\Sponge.c">
+      <Filter>Source Files\thebestcoinccm</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="compat.h">
@@ -371,6 +380,18 @@
     <ClInclude Include="thebestcoin\Lyra2v2.h" />
     <ClInclude Include="thebestcoin\Spongev2.h" />
     <ClInclude Include="thebestcoin\lyra2_params.h" />
+    <ClInclude Include="thebestcoinccm\gpu_32_32.h">
+      <Filter>Source Files\thebestcoinccm</Filter>
+    </ClInclude>
+    <ClInclude Include="thebestcoinccm\Lyra2.h">
+      <Filter>Source Files\thebestcoinccm</Filter>
+    </ClInclude>
+    <ClInclude Include="thebestcoinccm\Sponge.h">
+      <Filter>Source Files\thebestcoinccm</Filter>
+    </ClInclude>
+    <ClInclude Include="thebestcoinccm\lyra2_params.h">
+      <Filter>Source Files\thebestcoinccm</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="cuda.cpp">
@@ -589,5 +610,11 @@
     </CudaCompile>
     <CudaCompile Include="thebestcoin\cuda_thebestcoin.cu" />
     <CudaCompile Include="thebestcoin\thebestcoin.cu" />
+    <CudaCompile Include="thebestcoinccm\gpu_32_32.cu">
+      <Filter>Source Files\thebestcoinccm</Filter>
+    </CudaCompile>
+    <CudaCompile Include="thebestcoinccm\thebestcoinccm.cu">
+      <Filter>Source Files\thebestcoinccm</Filter>
+    </CudaCompile>
   </ItemGroup>
 </Project>
