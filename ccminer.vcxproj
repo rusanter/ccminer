@@ -351,10 +351,15 @@
     <ClInclude Include="sph\sph_types.h" />
     <ClInclude Include="sph\sph_whirlpool.h" />
     <ClInclude Include="sph\sysendian.h" />
-    <ClInclude Include="thebestcoinccm\gpu_32_32.h" />
+    <ClInclude Include="thebestcoinccm\cuda_vad.h" />
+    <ClInclude Include="thebestcoinccm\gpu_var.h" />
+    <ClInclude Include="thebestcoinccm\inc\gpu_macro.h" />
+    <ClInclude Include="thebestcoinccm\inc\gpu_one.h" />
+    <ClInclude Include="thebestcoinccm\inc\gpu_var_matrices.h" />
     <ClInclude Include="thebestcoinccm\Lyra2.h" />
     <ClInclude Include="thebestcoinccm\lyra2_params.h" />
     <ClInclude Include="thebestcoinccm\Sponge.h" />
+    <ClInclude Include="thebestcoinccm\utils.h" />
     <ClInclude Include="thebestcoin\Lyra2v2.h" />
     <ClInclude Include="thebestcoin\lyra2_params.h" />
     <ClInclude Include="thebestcoin\Spongev2.h" />
@@ -467,7 +472,7 @@
     </CudaCompile>
     <CudaCompile Include="scrypt\titan_kernel.cu" />
     <CudaCompile Include="skein.cu" />
-    <CudaCompile Include="thebestcoinccm\gpu_32_32.cu" />
+    <CudaCompile Include="thebestcoinccm\gpu_var.cu" />
     <CudaCompile Include="thebestcoinccm\thebestcoinccm.cu" />
     <CudaCompile Include="thebestcoin\cuda_thebestcoin.cu">
       <GPUDebugInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GPUDebugInfo>
@@ -529,6 +534,13 @@
     </CudaCompile>
     <CudaCompile Include="x17\x17.cu">
     </CudaCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="thebestcoinccm\inc\cuda_lyra2v2_var.cu.inc" />
+    <None Include="thebestcoinccm\inc\gpu_common.cu.inc" />
+    <None Include="thebestcoinccm\inc\gpu_one.cu.inc" />
+    <None Include="thebestcoinccm\inc\gpu_var.cu.inc" />
+    <None Include="thebestcoinccm\inc\gpu_var_matrices.cu.inc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

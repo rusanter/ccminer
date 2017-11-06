@@ -9,6 +9,10 @@ extern "C" {
 #include "miner.h"
 #include "cuda_helper.h"
 #include "lyra2_params.h"
+#include "gpu_var.h"
+#define Nrow LYRA2_ROWS
+#define Ncol LYRA2_COLS
+#define Tcost LYRA2_TCOST
 
 
 static _ALIGN(64) uint64_t *d_hash[MAX_GPUS];
@@ -26,10 +30,6 @@ extern void skein256_cpu_hash_32(int thr_id, uint32_t threads, uint32_t startNon
 extern void skein256_cpu_init(int thr_id, uint32_t threads);
 
 extern void skeinCube256_cpu_hash_32(int thr_id, uint32_t threads, uint32_t startNonce, uint64_t *d_outputHash);
-
-
-extern void lyra2v2_cpu_init_VAR_32_32(int thr_id, uint32_t threads,uint64_t *hash);
-extern void lyra2v2_cpu_hash_32_VAR_32_32(int thr_id, uint32_t threads, uint32_t startNounce, uint64_t *d_outputHash, uint32_t tpb);
 
 extern void bmw256_cpu_init(int thr_id, uint32_t threads);
 extern void bmw256_cpu_hash_32(int thr_id, uint32_t threads, uint32_t startNounce, uint64_t *g_hash, uint32_t *resultnonces, uint32_t target);
@@ -109,9 +109,13 @@ extern "C" int scanhash_thebestcoinccm(int thr_id, uint32_t *pdata,
 
 //    intensity = 1024 * 1024;
 //    tpb = 13;
-//    intensity = 128 * 1024;
-//    tpb = 29;
-    intensity = 16 * 1024;
+
+    // For 4x4 matrix
+    //intensity = 1024 * 1024;
+    //tpb = 9;
+
+    // For 32x32 matrix
+    intensity = 8 * 1024;
     tpb = 8;
 
 	uint32_t throughput = device_intensity(device_map[thr_id], __func__, intensity);
@@ -135,7 +139,7 @@ extern "C" int scanhash_thebestcoinccm(int thr_id, uint32_t *pdata,
 		applog(LOG_INFO, "GPU #%d: throughput is set to %d, tpb = %d", thr_id, throughput, tpb);
 
 		CUDA_SAFE_CALL(cudaMalloc(&d_hash2[thr_id], ROW_LEN_BYTES * LYRA2_ROWS * throughput)); // todo is d_hash2 used now?
-		lyra2v2_cpu_init_VAR_32_32(thr_id, throughput, d_hash2[thr_id]);
+		NAME_VAR(lyra2v2_cpu_init_VAR)(thr_id, throughput, d_hash2[thr_id]);
 		CUDA_SAFE_CALL(cudaMalloc(&d_hash[thr_id], 8 * sizeof(uint32_t) * throughput));
 		init[thr_id] = true;
 	}
@@ -164,7 +168,7 @@ extern "C" int scanhash_thebestcoinccm(int thr_id, uint32_t *pdata,
 
 		cubehash256_cpu_hash_32(thr_id, throughput, pdata[19], d_hash[thr_id]);
 
-		lyra2v2_cpu_hash_32_VAR_32_32(thr_id, throughput, pdata[19], d_hash[thr_id], tpb);
+		NAME_VAR(lyra2v2_cpu_hash_32_VAR)(thr_id, throughput, pdata[19], d_hash[thr_id], tpb);
 
 		cudaError_t cer = cudaGetLastError();
 		if (cer != cudaSuccess) {

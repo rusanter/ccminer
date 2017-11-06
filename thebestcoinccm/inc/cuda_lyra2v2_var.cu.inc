@@ -1,18 +1,9 @@
-
-
-#include <stdio.h>
-#include <memory.h>
-#include "cuda_vector.h"
-
-
 #define TPB52 256
 #define TPB50 64
 
 
 #define u64type uint2
-#define vectype uint28
 #define memshift 3
-__device__ vectype  *DMatrix;
 
 
 __device__ __forceinline__ void NAME_VAR(Gfunc_v35_VAR)(uint2 & a, uint2 &b, uint2 &c, uint2 &d)
@@ -270,7 +261,7 @@ void NAME_VAR(lyra2v2_gpu_hash_32_VAR)(uint32_t threads, uint32_t startNounce, u
         ((uint2*)state)[0].x ^= 0x20;
         ((uint2*)state)[1].x ^= 0x20;
         ((uint2*)state)[2].x ^= 0x20;
-        ((uint2*)state)[3].x ^= 0x01;
+        ((uint2*)state)[3].x ^= Tcost;
         ((uint2*)state)[4].x ^= Nrow;
         ((uint2*)state)[5].x ^= Ncol;
         ((uint2*)state)[6].x ^= 0x80;
@@ -325,19 +316,20 @@ void NAME_VAR(lyra2v2_gpu_hash_32_VAR)(uint32_t threads, uint32_t startNounce, u
             }
         } while (row < Nrow);
 
-        //int rowa;
-        /*int */prev = Nrow - 1;
-
-        step = Nrow / 2 - 1;
         row = 0;
-        do
+        for (uint32_t tau = 1; tau <= Tcost; tau++)
         {
-            rowa = ((uint2*)state)[0].x & (Nrow - 1);
-            NAME_VAR(reduceDuplexRowtV2_VAR)(prev, rowa, row, state, thread);
-            prev = row;
-            row = (row + step) & (Nrow - 1);
+            int step = ((tau & 1) == 0) ? -1 : (Nrow / 2 - 1);
+            do
+            {
+                rowa = ((uint2*)state)[0].x & (Nrow - 1);
+                NAME_VAR(reduceDuplexRowtV2_VAR)(prev, rowa, row, state, thread);
+                prev = row;
+                row = (row + step) & (Nrow - 1);
+            }
+            while (row != 0);
+
         }
-        while (row != 0);
 
 
         const uint32_t shift = (memshift * Ncol * rowa + Nrow * Ncol * memshift * thread);

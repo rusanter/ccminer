@@ -76,6 +76,9 @@
     <Filter Include="Source Files\thebestcoinccm">
       <UniqueIdentifier>{236ba524-752c-4054-b50c-bbfa5e277188}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\thebestcoinccm\inc">
+      <UniqueIdentifier>{bc7418ae-6128-4b56-a838-b97c933fca64}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="compat\jansson\dump.c">
@@ -380,9 +383,6 @@
     <ClInclude Include="thebestcoin\Lyra2v2.h" />
     <ClInclude Include="thebestcoin\Spongev2.h" />
     <ClInclude Include="thebestcoin\lyra2_params.h" />
-    <ClInclude Include="thebestcoinccm\gpu_32_32.h">
-      <Filter>Source Files\thebestcoinccm</Filter>
-    </ClInclude>
     <ClInclude Include="thebestcoinccm\Lyra2.h">
       <Filter>Source Files\thebestcoinccm</Filter>
     </ClInclude>
@@ -390,6 +390,24 @@
       <Filter>Source Files\thebestcoinccm</Filter>
     </ClInclude>
     <ClInclude Include="thebestcoinccm\lyra2_params.h">
+      <Filter>Source Files\thebestcoinccm</Filter>
+    </ClInclude>
+    <ClInclude Include="thebestcoinccm\inc\gpu_macro.h">
+      <Filter>Source Files\thebestcoinccm\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="thebestcoinccm\inc\gpu_one.h">
+      <Filter>Source Files\thebestcoinccm\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="thebestcoinccm\inc\gpu_var_matrices.h">
+      <Filter>Source Files\thebestcoinccm\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="thebestcoinccm\gpu_var.h">
+      <Filter>Source Files\thebestcoinccm</Filter>
+    </ClInclude>
+    <ClInclude Include="thebestcoinccm\cuda_vad.h">
+      <Filter>Source Files\thebestcoinccm</Filter>
+    </ClInclude>
+    <ClInclude Include="thebestcoinccm\utils.h">
       <Filter>Source Files\thebestcoinccm</Filter>
     </ClInclude>
   </ItemGroup>
@@ -610,11 +628,28 @@
     </CudaCompile>
     <CudaCompile Include="thebestcoin\cuda_thebestcoin.cu" />
     <CudaCompile Include="thebestcoin\thebestcoin.cu" />
-    <CudaCompile Include="thebestcoinccm\gpu_32_32.cu">
-      <Filter>Source Files\thebestcoinccm</Filter>
-    </CudaCompile>
     <CudaCompile Include="thebestcoinccm\thebestcoinccm.cu">
       <Filter>Source Files\thebestcoinccm</Filter>
     </CudaCompile>
+    <CudaCompile Include="thebestcoinccm\gpu_var.cu">
+      <Filter>Source Files\thebestcoinccm</Filter>
+    </CudaCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="thebestcoinccm\inc\cuda_lyra2v2_var.cu.inc">
+      <Filter>Source Files\thebestcoinccm\inc</Filter>
+    </None>
+    <None Include="thebestcoinccm\inc\gpu_common.cu.inc">
+      <Filter>Source Files\thebestcoinccm\inc</Filter>
+    </None>
+    <None Include="thebestcoinccm\inc\gpu_one.cu.inc">
+      <Filter>Source Files\thebestcoinccm\inc</Filter>
+    </None>
+    <None Include="thebestcoinccm\inc\gpu_var.cu.inc">
+      <Filter>Source Files\thebestcoinccm\inc</Filter>
+    </None>
+    <None Include="thebestcoinccm\inc\gpu_var_matrices.cu.inc">
+      <Filter>Source Files\thebestcoinccm\inc</Filter>
+    </None>
   </ItemGroup>
 </Project>
