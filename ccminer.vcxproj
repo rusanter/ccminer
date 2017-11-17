@@ -54,7 +54,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
-    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 9.0.props" />
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 8.0.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -177,7 +177,7 @@
       <MaxRegCount>80</MaxRegCount>
       <PtxAsOptionV>true</PtxAsOptionV>
       <Keep>true</Keep>
-      <CodeGeneration>compute_52,sm_52</CodeGeneration>
+      <CodeGeneration>compute_30,sm_30;compute_52,sm_52</CodeGeneration>
       <AdditionalOptions>--ptxas-options="-O3" %(AdditionalOptions)</AdditionalOptions>
       <Defines>
       </Defines>
@@ -262,8 +262,6 @@
     <ClCompile Include="scrypt.cpp" />
     <ClCompile Include="thebestcoinccm\Lyra2.c" />
     <ClCompile Include="thebestcoinccm\Sponge.c" />
-    <ClCompile Include="thebestcoin\Lyra2v2.c" />
-    <ClCompile Include="thebestcoin\Spongev2.c" />
     <ClCompile Include="util.cpp" />
     <ClCompile Include="fuguecoin.cpp" />
     <ClCompile Include="groestlcoin.cpp" />
@@ -360,9 +358,6 @@
     <ClInclude Include="thebestcoinccm\lyra2_params.h" />
     <ClInclude Include="thebestcoinccm\Sponge.h" />
     <ClInclude Include="thebestcoinccm\utils.h" />
-    <ClInclude Include="thebestcoin\Lyra2v2.h" />
-    <ClInclude Include="thebestcoin\lyra2_params.h" />
-    <ClInclude Include="thebestcoin\Spongev2.h" />
     <ClInclude Include="uint256.h" />
   </ItemGroup>
   <ItemGroup>
@@ -474,11 +469,6 @@
     <CudaCompile Include="skein.cu" />
     <CudaCompile Include="thebestcoinccm\gpu_var.cu" />
     <CudaCompile Include="thebestcoinccm\thebestcoinccm.cu" />
-    <CudaCompile Include="thebestcoin\cuda_thebestcoin.cu">
-      <GPUDebugInfo Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</GPUDebugInfo>
-      <FileType>Document</FileType>
-    </CudaCompile>
-    <CudaCompile Include="thebestcoin\thebestcoin.cu" />
     <CudaCompile Include="x11\cuda_x11_aes.cu">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </CudaCompile>
@@ -544,7 +534,7 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 9.0.targets" />
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 8.0.targets" />
   </ImportGroup>
   <!-- Copy the required dlls -->
   <Target Name="AfterBuild">

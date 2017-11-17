@@ -1558,12 +1558,8 @@ void print_hash_tests(void)
 	printf(CL_WHT "CPU HASH ON EMPTY BUFFER RESULTS:" CL_N "\n");
 
 	memset(hash, 0, sizeof hash);
-	thebestcoin_hash(&hash[0], &buf[0]);
-	printpfx("thebestcoin", hash);
-
-	memset(hash, 0, sizeof hash);
 	thebestcoinccm_hash(&hash[0], &buf[0]);
-	printpfx("thebestcoinccm", hash);
+	printpfx("thebestcoin", hash);
 
 	memset(hash, 0, sizeof hash);
 	blake256hash(&hash[0], &buf[0], 8);
