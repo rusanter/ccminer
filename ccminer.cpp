@@ -85,7 +85,6 @@ struct workio_cmd {
 
 enum sha_algos {
 	ALGO_THEBESTCOIN,
-	ALGO_THEBESTCOINCCM,
 	ALGO_BASTION,
 	ALGO_BITC,
 	ALGO_BITCOIN,
@@ -130,7 +129,6 @@ enum sha_algos {
 
 static const char *algo_names[] = {
 	"thebestcoin",
-	"thebestcoinccm",
 	"bastion",
 	"credit",
 	"bitcoin",
@@ -194,7 +192,7 @@ int opt_timeout = 270;
 static int opt_scantime = 5;
 static json_t *opt_config;
 static const bool opt_time = true;
-static enum sha_algos opt_algo = ALGO_X11;
+static enum sha_algos opt_algo = ALGO_THEBESTCOIN;
 int opt_n_threads = 0;
 int opt_n_gputhreads = 1;
 int opt_affinity = -1;
@@ -276,8 +274,7 @@ static char const usage[] = "\
 Usage: " PROGRAM_NAME " [OPTIONS]\n\
 Options:\n\
   -a, --algo=ALGO       specify the hash algorithm to use\n\
-			thebestcoin TheBestCoin (default)\n\
-			thebestcoinccm TheBestCoin based on lyra2 from ccminer\n\
+			thebestcoin Thebestcoin (default)\n\
 			bastion		bastioncoin\n\
 			bitcoin     Bitcoin\n\
 			blake       Blake 256 (SFR/NEOS)\n\
@@ -1226,7 +1223,6 @@ static void stratum_gen_work(struct stratum_ctx *sctx, struct work *work)
 			diff_to_target(work->target, sctx->job.diff / (65536.0 * opt_difficulty));
 			break;
 		case ALGO_THEBESTCOIN:
-		case ALGO_THEBESTCOINCCM:
 		case ALGO_DMD_GR:
 		case ALGO_MYR_GR:
 		case ALGO_FRESH:
@@ -1472,7 +1468,6 @@ static void *miner_thread(void *userdata)
 				minmax = 0x70000000U;
 				break;
 			case ALGO_THEBESTCOIN:
-			case ALGO_THEBESTCOINCCM:
 			case ALGO_SKEIN:
 			case ALGO_BITCOIN:
 			case ALGO_WHCX:
@@ -1544,11 +1539,6 @@ static void *miner_thread(void *userdata)
 		switch (opt_algo) {
 
 		case ALGO_THEBESTCOIN:
-			rc = scanhash_thebestcoin(thr_id, work.data, work.target,
-				max_nonce, &hashes_done);
-			break;
-
-		case ALGO_THEBESTCOINCCM:
 			rc = scanhash_thebestcoinccm(thr_id, work.data, work.target,
 				max_nonce, &hashes_done);
 			break;
