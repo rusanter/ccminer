@@ -192,7 +192,7 @@ int opt_timeout = 270;
 static int opt_scantime = 5;
 static json_t *opt_config;
 static const bool opt_time = true;
-static enum sha_algos opt_algo = ALGO_X11;
+static enum sha_algos opt_algo = ALGO_THEBESTCOIN;
 int opt_n_threads = 0;
 int opt_n_gputhreads = 1;
 int opt_affinity = -1;
