@@ -96,9 +96,13 @@ extern "C" int scanhash_thebestcoinccm(int thr_id, uint32_t *pdata,
 	cudaGetDeviceProperties(&props, device_map[thr_id]);
 
 	// calculate intensity depending of algo params, may not work for some params and GPUs
-	unsigned int vram = 1024 * 1024 * 1536; // 1,5GB VRAM
-	unsigned int msize = BLOCK_LEN_BYTES * LYRA2_COLS * LYRA2_ROWS; // Matrix size
-	intensity = (vram / msize);
+	//unsigned int vram = 1024 * 1024 * 1536; // 1,5GB VRAM
+	//unsigned int msize = BLOCK_LEN_BYTES * LYRA2_COLS * LYRA2_ROWS; // Matrix size
+	//intensity = (vram / msize);
+
+	// For 32x32 matrix
+	intensity = 16384;
+	tpb = 8;
 
 	// Values of tpb and intensity can be changed for specific video card to tune performance
 	//if (strstr(props.name, "980 Ti"))
@@ -106,17 +110,6 @@ extern "C" int scanhash_thebestcoinccm(int thr_id, uint32_t *pdata,
 	//	tpb = 10;
 	//	intensity = 256 * 256 * 18;
 	//}
-
-//    intensity = 1024 * 1024;
-//    tpb = 13;
-
-    // For 4x4 matrix
-    //intensity = 1024 * 1024;
-    //tpb = 9;
-
-    // For 32x32 matrix
-    intensity = 8 * 1024;
-    tpb = 8;
 
 	uint32_t throughput = device_intensity(device_map[thr_id], __func__, intensity);
 
