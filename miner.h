@@ -263,10 +263,6 @@ void sha256_init_8way(uint32_t *state);
 void sha256_transform_8way(uint32_t *state, const uint32_t *block, int swap);
 #endif
 
-extern int scanhash_thebestcoin(int thr_id, uint32_t *pdata,
-	const uint32_t *ptarget, uint32_t max_nonce,
-	unsigned long *hashes_done);
-
 extern int scanhash_thebestcoinccm(int thr_id, uint32_t *pdata,
 	const uint32_t *ptarget, uint32_t max_nonce,
 	unsigned long *hashes_done);
@@ -648,7 +644,6 @@ size_t time2str(char* buf, time_t timer);
 char* atime2str(time_t timer);
 
 void print_hash_tests(void);
-void thebestcoin_hash(void *state, const void *input);
 void thebestcoinccm_hash(void *state, const void *input);
 void blake256hash(void *output, const void *input, int8_t rounds);
 void deephash(void *state, const void *input);
